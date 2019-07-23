@@ -5,6 +5,7 @@
 # author:
 #     pureyang 2019-07-23
 # 参考：https://github.com/maozezhong/CV_ToolBox/blob/master/DataAugForObjectDetection
+
 ##############################################################
 
 # 包括:
@@ -15,8 +16,6 @@
 #     5. 旋转角度(需要改变bbox)
 #     6. 镜像(需要改变bbox)
 #     7. cutout
-# 注意:
-#     random.seed(),相同的seed,产生的随机数是一样的!!
 
 import time
 import random
@@ -27,7 +26,6 @@ import numpy as np
 from skimage.util import random_noise
 from lxml import etree, objectify
 import xml.etree.ElementTree as ET
-import xml.dom.minidom as DOC
 
 
 # 显示图片
@@ -97,10 +95,8 @@ class DataAugmentForObjectDetection():
         return random_noise(img, mode='gaussian', seed=int(time.time()), clip=True) * 255
         # return random_noise(img, mode='gaussian', clip=True)
 
-        # 调整亮度
-
+    # 调整亮度
     def _changeLight(self, img):
-        # random.seed(int(time.time()))
         flag = random.uniform(0.6, 1.3)
         blank = np.zeros(img.shape, img.dtype)
         alpha = beta = flag
@@ -123,7 +119,6 @@ class DataAugmentForObjectDetection():
             boxA, boxB为两个框，返回iou
             boxB为bouding box
             '''
-
             # determine the (x, y)-coordinates of the intersection rectangle
             xA = max(boxA[0], boxB[0])
             yA = max(boxA[1], boxB[1])
@@ -155,13 +150,9 @@ class DataAugmentForObjectDetection():
             h, w, c = img.shape
         else:
             _, h, w, c = img.shape
-
         mask = np.ones((h, w, c), np.float32)
-
         for n in range(n_holes):
-
             chongdie = True  # 看切割的区域是否与box重叠太多
-
             while chongdie:
                 y = np.random.randint(h)
                 x = np.random.randint(w)
@@ -385,6 +376,7 @@ class DataAugmentForObjectDetection():
 
         return flip_img, flip_bboxes
 
+    # 图像增强方法
     def dataAugment(self, img, bboxes):
         '''
         图像增强
@@ -459,104 +451,6 @@ class ToolHelper():
             coords.append([x_min, y_min, x_max, y_max, name])
         return coords
 
-    # 将bounding box信息写入xml文件中, bouding box格式为[[x_min, y_min, x_max, y_max, name]]
-    def generate_xml(self, img_name, coords, img_size, out_root_path):
-        '''
-        输入：
-            img_name：图片名称，如a.jpg
-            coords:坐标list，格式为[[x_min, y_min, x_max, y_max, name]]，name为概况的标注
-            img_size：图像的大小,格式为[h,w,c]
-            out_root_path: xml文件输出的根路径
-        '''
-        doc = DOC.Document()  # 创建DOM文档对象
-
-        annotation = doc.createElement('annotation')
-        doc.appendChild(annotation)
-
-        title = doc.createElement('folder')
-        title_text = doc.createTextNode('Tianchi')
-        title.appendChild(title_text)
-        annotation.appendChild(title)
-
-        title = doc.createElement('filename')
-        title_text = doc.createTextNode(img_name)
-        title.appendChild(title_text)
-        annotation.appendChild(title)
-
-        source = doc.createElement('source')
-        annotation.appendChild(source)
-
-        title = doc.createElement('database')
-        title_text = doc.createTextNode('The Tianchi Database')
-        title.appendChild(title_text)
-        source.appendChild(title)
-
-        title = doc.createElement('annotation')
-        title_text = doc.createTextNode('Tianchi')
-        title.appendChild(title_text)
-        source.appendChild(title)
-
-        size = doc.createElement('size')
-        annotation.appendChild(size)
-
-        title = doc.createElement('width')
-        title_text = doc.createTextNode(str(img_size[1]))
-        title.appendChild(title_text)
-        size.appendChild(title)
-
-        title = doc.createElement('height')
-        title_text = doc.createTextNode(str(img_size[0]))
-        title.appendChild(title_text)
-        size.appendChild(title)
-
-        title = doc.createElement('depth')
-        title_text = doc.createTextNode(str(img_size[2]))
-        title.appendChild(title_text)
-        size.appendChild(title)
-
-        for coord in coords:
-            object = doc.createElement('object')
-            annotation.appendChild(object)
-
-            title = doc.createElement('name')
-            title_text = doc.createTextNode(coord[4])
-            title.appendChild(title_text)
-            object.appendChild(title)
-
-            pose = doc.createElement('pose')
-            pose.appendChild(doc.createTextNode('Unspecified'))
-            object.appendChild(pose)
-            truncated = doc.createElement('truncated')
-            truncated.appendChild(doc.createTextNode('1'))
-            object.appendChild(truncated)
-            difficult = doc.createElement('difficult')
-            difficult.appendChild(doc.createTextNode('0'))
-            object.appendChild(difficult)
-
-            bndbox = doc.createElement('bndbox')
-            object.appendChild(bndbox)
-            title = doc.createElement('xmin')
-            title_text = doc.createTextNode(str(int(float(coord[0]))))
-            title.appendChild(title_text)
-            bndbox.appendChild(title)
-            title = doc.createElement('ymin')
-            title_text = doc.createTextNode(str(int(float(coord[1]))))
-            title.appendChild(title_text)
-            bndbox.appendChild(title)
-            title = doc.createElement('xmax')
-            title_text = doc.createTextNode(str(int(float(coord[2]))))
-            title.appendChild(title_text)
-            bndbox.appendChild(title)
-            title = doc.createElement('ymax')
-            title_text = doc.createTextNode(str(int(float(coord[3]))))
-            title.appendChild(title_text)
-            bndbox.appendChild(title)
-
-        # 将DOM对象doc写入文件
-        f = open(os.path.join(out_root_path, img_name[:-4] + '.xml'), 'w')
-        f.write(doc.toprettyxml(indent=''))
-        f.close()
-
     # 保存图片结果
     def save_img(self, file_name, save_folder, img):
         cv2.imwrite(os.path.join(save_folder, file_name), img)
@@ -587,7 +481,8 @@ class ToolHelper():
             ),
             E.segmented(0),
         )
-        labels, bboxs = bboxs_info
+
+        labels, bboxs = bboxs_info  # 得到边框和标签信息
         for label, box in zip(labels, bboxs):
             anno_tree.append(
                 E.object(
@@ -608,8 +503,9 @@ class ToolHelper():
 
 if __name__ == '__main__':
 
-    need_aug_num = 10  # 每张图片需要增强的张数
-    is_endwidth_dot = True  # 文件是否以.jpg或者png结尾ie
+    need_aug_num = 50  # 每张图片需要增强的次数
+
+    is_endwidth_dot = True  # 文件是否以.jpg或者png结尾
 
     dataAug = DataAugmentForObjectDetection()  # 数据增强工具类
 
@@ -629,7 +525,6 @@ if __name__ == '__main__':
         os.mkdir(save_xml_folder)
 
     for parent, _, files in os.walk(source_pic_root_path):
-
         for file in files:
             cnt = 0
             pic_path = os.path.join(parent, file)
@@ -638,29 +533,23 @@ if __name__ == '__main__':
             coords = [v[:4] for v in values]  # 得到框
             labels = [v[-1] for v in values]  # 对象的标签
 
+            # 如果图片是有后缀的
             if is_endwidth_dot:
                 # 找到文件的最后名字
                 dot_index = file.rfind('.')
                 _file_prefix = file[:dot_index]  # 文件名的前缀
                 _file_suffix = file[dot_index:]  # 文件名的后缀
-
             img = cv2.imread(pic_path)
+
             # show_pic(img, coords)  # 显示原图
-
             while cnt < need_aug_num:  # 继续增强
-
                 auged_img, auged_bboxes = dataAug.dataAugment(img, coords)
-
                 auged_bboxes_int = np.array(auged_bboxes).astype(np.int32)
-
                 height, width, channel = auged_img.shape  # 得到图片的属性
-
                 toolhelper.save_img('{}_{}{}'.format(_file_prefix, cnt + 1, _file_suffix), save_pic_folder,
                                     auged_img)  # 保存增强图片
 
                 toolhelper.save_xml('{}_{}.xml'.format(_file_prefix, cnt + 1),
                                     save_xml_folder, height, width, channel, (labels, auged_bboxes_int))  # 保存xml文件
-
                 # show_pic(auged_img, auged_bboxes)  # 强化后的图
-
                 cnt += 1  # 继续增强下一张
