@@ -4,6 +4,7 @@
 #     data augmentation for obeject detection
 # author:
 #     pureyang 2019-07-23
+# 参考：https://github.com/maozezhong/CV_ToolBox/blob/master/DataAugForObjectDetection
 ##############################################################
 
 # 包括:
@@ -14,7 +15,7 @@
 #     5. 旋转角度(需要改变bbox)
 #     6. 镜像(需要改变bbox)
 #     7. cutout
-# 注意:   
+# 注意:
 #     random.seed(),相同的seed,产生的随机数是一样的!!
 
 import time
@@ -24,7 +25,6 @@ import os
 import math
 import numpy as np
 from skimage.util import random_noise
-from skimage import exposure
 from lxml import etree, objectify
 import xml.etree.ElementTree as ET
 import xml.dom.minidom as DOC
@@ -38,8 +38,6 @@ def show_pic(img, bboxes=None):
         bboxes:图像的所有boudning box list, 格式为[[x_min, y_min, x_max, y_max]....]
         names:每个box对应的名称
     '''
-    # cv2.imwrite('./1.jpg', img)
-    # img = cv2.imread('./1.jpg')
     for i in range(len(bboxes)):
         bbox = bboxes[i]
         x_min = bbox[0]
@@ -53,7 +51,6 @@ def show_pic(img, bboxes=None):
     cv2.imshow('pic', img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-    # os.remove('./1.jpg')
 
 
 # 图像均为cv2读取
@@ -96,7 +93,7 @@ class DataAugmentForObjectDetection():
         输出:
             加噪声后的图像array,由于输出的像素是在[0,1]之间,所以得乘以255
         '''
-        # random.seed(int(time.time())) 
+        # random.seed(int(time.time()))
         return random_noise(img, mode='gaussian', seed=int(time.time()), clip=True) * 255
         # return random_noise(img, mode='gaussian', clip=True)
 
@@ -104,8 +101,10 @@ class DataAugmentForObjectDetection():
 
     def _changeLight(self, img):
         # random.seed(int(time.time()))
-        flag = random.uniform(0.5, 1.3)  # flag>1为调暗,小于1为调亮
-        return exposure.adjust_gamma(img, flag)
+        flag = random.uniform(0.6, 1.3)
+        blank = np.zeros(img.shape, img.dtype)
+        alpha = beta = flag
+        return cv2.addWeighted(img, alpha, blank, 1 - alpha, beta)
 
     # cutout
     def _cutout(self, img, bboxes, length=100, n_holes=1, threshold=0.5):
@@ -405,25 +404,21 @@ class DataAugmentForObjectDetection():
                     # print('旋转')
                     change_num += 1
                     angle = random.uniform(-self.max_rotation_angle, self.max_rotation_angle)
-                    # angle = random.sample([90, 180, 270], 1)[0]
                     scale = random.uniform(0.7, 0.8)
                     img, bboxes = self._rotate_img_bbox(img, bboxes, angle, scale)
 
             if self.is_shift_pic_bboxes:
                 if random.random() < self.shift_rate:  # 平移
-                    # print('平移')
                     change_num += 1
                     img, bboxes = self._shift_pic_bboxes(img, bboxes)
 
             if self.is_changeLight:
                 if random.random() > self.change_light_rate:  # 改变亮度
-                    # print('亮度')
                     change_num += 1
                     img = self._changeLight(img)
 
             if self.is_addNoise:
                 if random.random() < self.add_noise_rate:  # 加噪声
-                    # print('加噪声')
                     change_num += 1
                     img = self._addNoise(img)
             if self.is_cutout:
@@ -434,7 +429,6 @@ class DataAugmentForObjectDetection():
                                        threshold=self.cut_out_threshold)
             if self.is_filp_pic_bboxes:
                 if random.random() < self.flip_rate:  # 翻转
-                    # print('翻转')
                     change_num += 1
                     img, bboxes = self._filp_pic_bboxes(img, bboxes)
 
@@ -614,7 +608,7 @@ class ToolHelper():
 
 if __name__ == '__main__':
 
-    need_aug_num = 50  # 每张图片需要增强的次数
+    need_aug_num = 10  # 每张图片需要增强的张数
     is_endwidth_dot = True  # 文件是否以.jpg或者png结尾ie
 
     dataAug = DataAugmentForObjectDetection()  # 数据增强工具类
@@ -666,6 +660,7 @@ if __name__ == '__main__':
 
                 toolhelper.save_xml('{}_{}.xml'.format(_file_prefix, cnt + 1),
                                     save_xml_folder, height, width, channel, (labels, auged_bboxes_int))  # 保存xml文件
+
                 # show_pic(auged_img, auged_bboxes)  # 强化后的图
 
                 cnt += 1  # 继续增强下一张
