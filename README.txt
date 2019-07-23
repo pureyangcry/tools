@@ -1,4 +1,4 @@
-这是一个目标检测图片增强的完整工具
+这是一个目标检测图片增强的完整工具，您事先需要标记一些图片，然后使用该代码即可！
 包括2个python文件（rename_file.py和DataAugmentForObejctDetection.py）
 注：保存图片的和标签请使用PascalVoc格式
 1.rename_file.py能实现文件的重命名
