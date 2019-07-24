@@ -22,6 +22,7 @@
 
 import time
 import random
+import copy
 import cv2
 import os
 import math
@@ -340,7 +341,6 @@ class DataAugmentForObjectDetection():
 
         return shift_img, shift_bboxes
 
-
     # 镜像
     def _filp_pic_bboxes(self, img, bboxes):
         '''
@@ -354,7 +354,7 @@ class DataAugmentForObjectDetection():
                 flip_bboxes:平移后的bounding box的坐标list
         '''
         # ---------------------- 翻转图像 ----------------------
-        import copy
+
         flip_img = copy.deepcopy(img)
         if random.random() < 0.5:  # 0.5的概率水平翻转，0.5的概率垂直翻转
             horizon = True
@@ -379,7 +379,6 @@ class DataAugmentForObjectDetection():
                 flip_bboxes.append([x_min, h - y_max, x_max, h - y_min])
 
         return flip_img, flip_bboxes
-
 
     # 图像增强方法
     def dataAugment(self, img, bboxes):
