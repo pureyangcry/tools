@@ -57,7 +57,7 @@ def show_pic(img, bboxes=None):
 
 # 图像均为cv2读取
 class DataAugmentForObjectDetection():
-    def __init__(self, rotation_rate=0.5, max_rotation_angle=13,
+    def __init__(self, rotation_rate=0.5, max_rotation_angle=180,
                  crop_rate=0.5, shift_rate=0.5, change_light_rate=0.5,
                  add_noise_rate=0.5, flip_rate=0.5,
                  cutout_rate=0.5, cut_out_length=50, cut_out_holes=1, cut_out_threshold=0.5,
