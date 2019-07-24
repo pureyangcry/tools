@@ -16,6 +16,9 @@
 #     5. 旋转角度(需要改变bbox)
 #     6. 镜像(需要改变bbox)
 #     7. cutout
+#  注意:
+#     random.seed(),相同的seed,产生的随机数是一样的!!
+
 
 import time
 import random
@@ -337,6 +340,7 @@ class DataAugmentForObjectDetection():
 
         return shift_img, shift_bboxes
 
+
     # 镜像
     def _filp_pic_bboxes(self, img, bboxes):
         '''
@@ -375,6 +379,7 @@ class DataAugmentForObjectDetection():
                 flip_bboxes.append([x_min, h - y_max, x_max, h - y_min])
 
         return flip_img, flip_bboxes
+
 
     # 图像增强方法
     def dataAugment(self, img, bboxes):
@@ -456,7 +461,7 @@ class ToolHelper():
         cv2.imwrite(os.path.join(save_folder, file_name), img)
 
     # 保持xml结果
-    def save_xml(self, file_name, save_folder, height, width, channel, bboxs_info):
+    def save_xml(self, file_name, save_folder, img_info, height, width, channel, bboxs_info):
         '''
         :param file_name:文件名
         :param save_folder:#保存的xml文件的结果
@@ -465,12 +470,14 @@ class ToolHelper():
         :param channel:通道
         :return:
         '''
+        folder_name, img_name = img_info  # 得到图片的信息
+
         E = objectify.ElementMaker(annotate=False)
 
         anno_tree = E.annotation(
-            E.folder(save_folder),
-            E.filename(file_name),
-            E.path(os.path.join(save_folder, file_name)),
+            E.folder(folder_name),
+            E.filename(img_name),
+            E.path(os.path.join(folder_name, img_name)),
             E.source(
                 E.database('Unknown'),
             ),
@@ -503,7 +510,7 @@ class ToolHelper():
 
 if __name__ == '__main__':
 
-    need_aug_num = 50  # 每张图片需要增强的次数
+    need_aug_num = 100  # 每张图片需要增强的次数
 
     is_endwidth_dot = True  # 文件是否以.jpg或者png结尾
 
@@ -546,10 +553,12 @@ if __name__ == '__main__':
                 auged_img, auged_bboxes = dataAug.dataAugment(img, coords)
                 auged_bboxes_int = np.array(auged_bboxes).astype(np.int32)
                 height, width, channel = auged_img.shape  # 得到图片的属性
-                toolhelper.save_img('{}_{}{}'.format(_file_prefix, cnt + 1, _file_suffix), save_pic_folder,
+                img_name = '{}_{}{}'.format(_file_prefix, cnt + 1, _file_suffix)  # 图片保存的信息
+                toolhelper.save_img(img_name, save_pic_folder,
                                     auged_img)  # 保存增强图片
 
                 toolhelper.save_xml('{}_{}.xml'.format(_file_prefix, cnt + 1),
-                                    save_xml_folder, height, width, channel, (labels, auged_bboxes_int))  # 保存xml文件
+                                    save_xml_folder, (save_pic_folder, img_name), height, width, channel,
+                                    (labels, auged_bboxes_int))  # 保存xml文件
                 # show_pic(auged_img, auged_bboxes)  # 强化后的图
                 cnt += 1  # 继续增强下一张
