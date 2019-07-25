@@ -509,7 +509,7 @@ class ToolHelper():
 
 if __name__ == '__main__':
 
-    need_aug_num = 100  # 每张图片需要增强的次数
+    need_aug_num = 30  # 每张图片需要增强的次数
 
     is_endwidth_dot = True  # 文件是否以.jpg或者png结尾
 
