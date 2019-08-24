@@ -3,7 +3,7 @@
 # description:
 #     data augmentation for obeject detection
 # author:
-#     pureyang 2019-07-23
+#     pureyang 2019-08-26
 # 参考：https://github.com/maozezhong/CV_ToolBox/blob/master/DataAugForObjectDetection
 
 ##############################################################
@@ -101,10 +101,9 @@ class DataAugmentForObjectDetection():
 
     # 调整亮度
     def _changeLight(self, img):
-        flag = random.uniform(0.6, 1.3)
+        alpha = random.uniform(0.35, 1)
         blank = np.zeros(img.shape, img.dtype)
-        alpha = beta = flag
-        return cv2.addWeighted(img, alpha, blank, 1 - alpha, beta)
+        return cv2.addWeighted(img, alpha, blank, 1 - alpha, 0)
 
     # cutout
     def _cutout(self, img, bboxes, length=100, n_holes=1, threshold=0.5):
@@ -509,7 +508,7 @@ class ToolHelper():
 
 if __name__ == '__main__':
 
-    need_aug_num = 20  # 每张图片需要增强的次数
+    need_aug_num = 50  # 每张图片需要增强的次数
 
     is_endwidth_dot = True  # 文件是否以.jpg或者png结尾
 
