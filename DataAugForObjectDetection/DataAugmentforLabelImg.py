@@ -30,6 +30,7 @@ import numpy as np
 from skimage.util import random_noise
 from lxml import etree, objectify
 import xml.etree.ElementTree as ET
+import argparse
 
 
 # 显示图片
@@ -499,7 +500,7 @@ class ToolHelper():
 
 if __name__ == '__main__':
 
-    need_aug_num = 10 # 每张图片需要增强的次数
+    need_aug_num = 10  # 每张图片需要增强的次数
 
     is_endwidth_dot = True  # 文件是否以.jpg或者png结尾
 
@@ -507,25 +508,32 @@ if __name__ == '__main__':
 
     toolhelper = ToolHelper()  # 工具
 
-    source_pic_root_path = 'data/Images'  # 图片原始位置
-    source_xml_root_path = 'data/Annotations'  # xml的原始位置
+    # 获取相关参数
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--source_img_path', type=str, default='data/Images')
+    parser.add_argument('--source_xml_path', type=str, default='data/Annotations')
+    parser.add_argument('--save_img_path', type=str, default='data/Images2')
+    parser.add_argument('--save_xml_path', type=str, default='data/Annotations2')
+    args = parser.parse_args()
+    source_img_path = args.source_img_path  # 图片原始位置
+    source_xml_path = args.source_xml_path  # xml的原始位置
 
-    save_pic_folder = 'data/Images2'  # 图片增强结果保存文件
-    save_xml_folder = 'data/Annotations2'  # xml增强结果保存文件
+    save_img_path = args.save_img_path  # 图片增强结果保存文件
+    save_xml_path = args.save_xml_path  # xml增强结果保存文件
 
     # 如果保存文件夹不存在就创建
-    if not os.path.exists(save_pic_folder):
-        os.mkdir(save_pic_folder)
+    if not os.path.exists(save_img_path):
+        os.mkdir(save_img_path)
 
-    if not os.path.exists(save_xml_folder):
-        os.mkdir(save_xml_folder)
+    if not os.path.exists(save_xml_path):
+        os.mkdir(save_xml_path)
 
-    for parent, _, files in os.walk(source_pic_root_path):
+    for parent, _, files in os.walk(source_img_path):
         files.sort()
         for file in files:
             cnt = 0
             pic_path = os.path.join(parent, file)
-            xml_path = os.path.join(source_xml_root_path, file[:-4] + '.xml')
+            xml_path = os.path.join(source_xml_path, file[:-4] + '.xml')
             values = toolhelper.parse_xml(xml_path)  # 解析得到box信息，格式为[[x_min,y_min,x_max,y_max,name]]
             coords = [v[:4] for v in values]  # 得到框
             labels = [v[-1] for v in values]  # 对象的标签
@@ -544,11 +552,11 @@ if __name__ == '__main__':
                 auged_bboxes_int = np.array(auged_bboxes).astype(np.int32)
                 height, width, channel = auged_img.shape  # 得到图片的属性
                 img_name = '{}_{}{}'.format(_file_prefix, cnt + 1, _file_suffix)  # 图片保存的信息
-                toolhelper.save_img(img_name, save_pic_folder,
+                toolhelper.save_img(img_name, save_img_path,
                                     auged_img)  # 保存增强图片
 
                 toolhelper.save_xml('{}_{}.xml'.format(_file_prefix, cnt + 1),
-                                    save_xml_folder, (save_pic_folder, img_name), height, width, channel,
+                                    save_xml_path, (save_img_path, img_name), height, width, channel,
                                     (labels, auged_bboxes_int))  # 保存xml文件
                 # show_pic(auged_img, auged_bboxes)  # 强化后的图
                 print(img_name)

@@ -20,6 +20,7 @@ import base64
 import json
 import re
 from copy import deepcopy
+import argparse
 
 
 # 图像均为cv2读取
@@ -202,13 +203,20 @@ if __name__ == '__main__':
     is_endwidth_dot = True  # 文件是否以.jpg或者png结尾
 
     dataAug = DataAugmentForObjectDetection()  # 数据增强工具类
-    source_pic_json__root_path = 'data'  # 图片和json文件原始位置
-    save_pic_json_folder = 'data2'  # 图片增强结果保存文件
-    # 如果保存文件夹不存在就创建
-    if not os.path.exists(save_pic_json_folder):
-        os.mkdir(save_pic_json_folder)
 
-    for parent, _, files in os.walk(source_pic_json__root_path):
+    # 获取相关参数
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--source_img_json_path', type=str, default='data')
+    parser.add_argument('--save_img_json_path', type=str, default='data2')
+    args = parser.parse_args()
+    source_img_json_path = args.source_img_json_path  # 图片和json文件原始位置
+    save_img_json_path = args.save_img_json_path  # 图片增强结果保存文件
+
+    # 如果保存文件夹不存在就创建
+    if not os.path.exists(save_img_json_path):
+        os.mkdir(save_img_json_path)
+
+    for parent, _, files in os.walk(source_img_json_path):
         files.sort()  # 排序一下
         for file in files:
             if file.endswith('jpg') or file.endswith('png'):
@@ -227,13 +235,13 @@ if __name__ == '__main__':
                 while cnt < need_aug_num:  # 继续增强
                     auged_img, json_info = dataAug.dataAugment(deepcopy(img), deepcopy(json_dic))
                     img_name = '{}_{}{}'.format(_file_prefix, cnt + 1, _file_suffix)  # 图片保存的信息
-                    img_save_path = os.path.join(save_pic_json_folder, img_name)
+                    img_save_path = os.path.join(save_img_json_path, img_name)
                     toolhelper.save_img(img_save_path, auged_img)  # 保存增强图片
 
                     json_info['imagePath'] = img_name
                     base64_data = toolhelper.img2str(img_save_path)
                     json_info['imageData'] = base64_data
                     toolhelper.save_json('{}_{}.json'.format(_file_prefix, cnt + 1),
-                                         save_pic_json_folder, json_info)  # 保存xml文件
+                                         save_img_json_path, json_info)  # 保存xml文件
                     print(img_name)
                     cnt += 1  # 继续增强下一张
