@@ -13,3 +13,9 @@
 
 **实现这个工具参考了：**
 https://github.com/maozezhong/CV_ToolBox/blob/master/DataAugForObjectDetection/
+
+
+##Demo
+**LabelImg标定的原始图片:**
+
+
