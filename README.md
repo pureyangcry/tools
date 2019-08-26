@@ -16,6 +16,23 @@ https://github.com/maozezhong/CV_ToolBox/blob/master/DataAugForObjectDetection/
 
 
 ##Demo
+
 **LabelImg标定用于检测的图片:**
 
+![image](https://github.com/pureyangcry/tools/blob/master/Imgs/d_demo.jpg)
+
+增强结果：
+
+
 ![image](https://github.com/pureyangcry/tools/blob/master/Imgs/d_results.jpg)
+
+
+
+**LabelMe标定用于检测的图片:**
+
+![image](https://github.com/pureyangcry/tools/blob/master/Imgs/s_demo.jpg)
+
+
+增强结果：
+
+![image](https://github.com/pureyangcry/tools/blob/master/Imgs/s_results.jpg)
