@@ -17,5 +17,5 @@ https://github.com/maozezhong/CV_ToolBox/blob/master/DataAugForObjectDetection/
 
 ##Demo
 **LabelImg标定用于检测的图片:**
-![Alt](https://github.com/pureyangcry/tools/blob/master/Imgs/d_results.jpg =648x3513)
 
+![image](https://github.com/pureyangcry/tools/blob/master/Imgs/d_results.jpg)
