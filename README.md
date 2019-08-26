@@ -43,4 +43,4 @@ https://github.com/maozezhong/CV_ToolBox/blob/master/DataAugForObjectDetection/
 增强结果：
 
 
-![image](https://github.com/pureyangcry/tools/blob/master/Imgs/s_result.jpg)
+![image](https://github.com/pureyangcry/tools/blob/master/Imgs/s_results.jpg)
